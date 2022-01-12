@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from sympy import * 
 
 def r_beta(length, beta, element_number):
     k = length * beta
@@ -306,6 +307,45 @@ if __name__ == '__main__':
                 matrix_global[int(A[n,i]),int(A[n,j])] = matrix_global[int(A[n,i]),int(A[n,j])] + k_k_sum[i,j,n]
          
     results = np.dot(np.linalg.inv(matrix_global),T)
+    
+    #Obliczanie temperatury w poszczegolnych elementach 
+    
+    y = symbols('y')
+    x = symbols('x')
+    
+    s = x - a
+    t = y - b
+    
+    N1 = ((a-s)*(b-t))/(4*a*b)
+
+    N2 = ((a+s)*(b-t))/(4*a*b)
+    N3 = ((a+s)*(b+t))/(4*a*b)
+    N4 = ((a-s)*(b+t))/(4*a*b)
+    
+    N_t = np.array([N1, N2, N3, N4])
+    
+    
+    Eq = zeros(elements_q,1)
+    i = 0
+
+    for i in range(elements_q):
+        Temperature = [results[int(A[i,0])], results[int(A[i,1])], results[int(A[i,2])], results[int(A[i,3])]]
+        q = np.transpose(N_t)*np.transpose(Temperature)
+        Eq[i] = sum(sum(q))
+        
+    print(Eq)
+    
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
