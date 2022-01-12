@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sympy import * 
+import seaborn as sns
+import pandas as pd
 
 def r_beta(length, beta, element_number):
     k = length * beta
@@ -83,15 +85,15 @@ def k_k(a,b,k_x,k_y):
 if __name__ == '__main__':
     #Data set
     h = 55
-    T_inf = 20
-    k_x = 45
-    k_y = 45
+    T_inf = 28
+    k_x = 55
+    k_y = 55
     n_2 = 0
     q = 0
-    beta_1 = 5000
+    beta_1 = 6000
     beta_2 = h * T_inf
     alfa = -h
-    a = 0.01/2
+    a = 0.02/2
     b = a
     
     elements_q = 10
@@ -120,7 +122,7 @@ if __name__ == '__main__':
     
     A[0::] = [5,6,2,1]
     r_beta_sum[0::] = np.transpose(r_beta_1)    
-    k_k_sum[:,:,0] = k_k_1 #Tu moze byc błąd, wyżej sprawdzone!!!!!
+    k_k_sum[:,:,0] = k_k_1
     
     
     #Element 2 - wezly 7 8 4 3
@@ -317,7 +319,6 @@ if __name__ == '__main__':
     t = y - b
     
     N1 = ((a-s)*(b-t))/(4*a*b)
-
     N2 = ((a+s)*(b-t))/(4*a*b)
     N3 = ((a+s)*(b+t))/(4*a*b)
     N4 = ((a-s)*(b+t))/(4*a*b)
@@ -332,11 +333,44 @@ if __name__ == '__main__':
         Temperature = [results[int(A[i,0])], results[int(A[i,1])], results[int(A[i,2])], results[int(A[i,3])]]
         q = np.transpose(N_t)*np.transpose(Temperature)
         Eq[i] = sum(sum(q))
-        
-    print(Eq)
+         
+    
+    #Wykres
+     
+    n = 1
+    n_2 = np.zeros((n,n,elements_q))
+    x1 = np.linspace(0,0.01,n)
+    
+    print(x1)
+    
+    max_val = Eq[0].subs([(x,0),(y,0)])
+    min_val = max_val
     
     
-        
+    for k in range(elements_q):
+        for i in range(n):
+            for j in range(n):
+                n_2[n-i-1,j,k]=Eq[k].subs([(x,x1[j]),(y,x1[i])])
+                t=n_2[n-i-1,j,k]
+                if t > max_val:
+                    max_val = t
+                if t < min_val:
+                    min_val = t
+    
+    Wykres=np.zeros((3*n,6*n))
+    Wykres[0,0] = n_2[:,:,0]
+    Wykres[0,5] = n_2[:,:,1]
+    Wykres[1,0] = n_2[:,:,2]
+    Wykres[1,5] = n_2[:,:,3]
+    Wykres[2,0:6] = n_2[:,:,4:10]
+    
+    df = pd.DataFrame(Wykres, columns=["col1", "col2", "col3", "col4", "col5", "col6"])
+    
+    ax = sns.heatmap(df, mask = Wykres < 0.01, xticklabels = [], yticklabels = [] ,cmap = 'Blues', vmin=60, vmax=82,linewidths=.5, annot = Wykres, square = True, linecolor='black', cbar_kws={'label': 'Temperatura [°C] '}).set_title('Rozkład 2D temperatury w elemencie')
+    ax = sns.grid
+
+    
+    
     
     
     
