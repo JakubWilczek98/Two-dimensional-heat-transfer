@@ -82,6 +82,28 @@ def k_k(a,b,k_x,k_y):
       ])
     return k_k
 
+def nodes_temperature(nodes_q, elements_q, A, r_beta_sum, k_k_sum):
+    # Temperatura w poszczegolnych wezlach
+    T = np.zeros((nodes_q,1))
+    matrix_global = np.zeros((nodes_q,nodes_q))    
+    A = A - 1 
+    i = 0
+    j = 0
+    for i in range(elements_q):
+        for j in range(4):
+            T[int(A[i,j])] = T[int(A[i,j])] + r_beta_sum[i,j]
+            
+    
+    n = 0
+    i = 0
+    j = 0
+    for n in range(elements_q):
+        for i in range(4):
+            for j in range(4):
+                matrix_global[int(A[n,i]),int(A[n,j])] = matrix_global[int(A[n,i]),int(A[n,j])] + k_k_sum[i,j,n]
+         
+    return np.dot(np.linalg.inv(matrix_global),T) #results
+
 if __name__ == '__main__':
     #Data set
     h = 55
@@ -96,9 +118,11 @@ if __name__ == '__main__':
     a = 0.02/2
     b = a
     
+    #Number of nodes and elements
     elements_q = 10
     nodes_q = 22
     
+    #Target matrixes 
     A = np.zeros((elements_q,4))
     r_beta_sum = np.zeros((elements_q,4))
     k_k_sum = np.zeros((4,4,elements_q))
@@ -287,31 +311,12 @@ if __name__ == '__main__':
     A[9::] = [21, 22, 15, 14];
     r_beta_sum[9::] = np.transpose(r_beta_10)
     k_k_sum[:,:,9] = k_k_10;
-    
-    # Temperatura w poszczegolnych wezlach
-    T = np.zeros((nodes_q,1))
-    matrix_global = np.zeros((nodes_q,nodes_q))
-    
-    A = A - 1 
-    i = 0
-    j = 0
-    for i in range(elements_q):
-        for j in range(4):
-            T[int(A[i,j])] = T[int(A[i,j])] + r_beta_sum[i,j]
-            
-    
-    n = 0
-    i = 0
-    j = 0
-    for n in range(elements_q):
-        for i in range(4):
-            for j in range(4):
-                matrix_global[int(A[n,i]),int(A[n,j])] = matrix_global[int(A[n,i]),int(A[n,j])] + k_k_sum[i,j,n]
-         
-    results = np.dot(np.linalg.inv(matrix_global),T)
+       
+    nodes_temperature = nodes_temperature(nodes_q, elements_q, A, r_beta_sum, k_k_sum)
     
     #Obliczanie temperatury w poszczegolnych elementach 
     
+    A = A - 1
     y = symbols('y')
     x = symbols('x')
     
@@ -330,7 +335,7 @@ if __name__ == '__main__':
     i = 0
 
     for i in range(elements_q):
-        Temperature = [results[int(A[i,0])], results[int(A[i,1])], results[int(A[i,2])], results[int(A[i,3])]]
+        Temperature = [nodes_temperature[int(A[i,0])], nodes_temperature[int(A[i,1])], nodes_temperature[int(A[i,2])], nodes_temperature[int(A[i,3])]]
         q = np.transpose(N_t)*np.transpose(Temperature)
         Eq[i] = sum(sum(q))
          
@@ -340,8 +345,6 @@ if __name__ == '__main__':
     n = 1
     n_2 = np.zeros((n,n,elements_q))
     x1 = np.linspace(0,0.01,n)
-    
-    print(x1)
     
     max_val = Eq[0].subs([(x,0),(y,0)])
     min_val = max_val
@@ -367,7 +370,6 @@ if __name__ == '__main__':
     df = pd.DataFrame(Wykres, columns=["col1", "col2", "col3", "col4", "col5", "col6"])
     
     ax = sns.heatmap(df, mask = Wykres < 0.01, xticklabels = [], yticklabels = [] ,cmap = 'Blues', vmin=60, vmax=82,linewidths=.5, annot = Wykres, square = True, linecolor='black', cbar_kws={'label': 'Temperatura [°C] '}).set_title('Rozkład 2D temperatury w elemencie')
-    ax = sns.grid
 
     
     
