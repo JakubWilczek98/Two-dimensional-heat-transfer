@@ -285,7 +285,27 @@ if __name__ == '__main__':
     r_beta_sum[9::] = np.transpose(r_beta_10)
     k_k_sum[:,:,9] = k_k_10;
     
-
+    # Temperatura w poszczegolnych wezlach
+    T = np.zeros((nodes_q,1))
+    matrix_global = np.zeros((nodes_q,nodes_q))
+    
+    A = A - 1 
+    i = 0
+    j = 0
+    for i in range(elements_q):
+        for j in range(4):
+            T[int(A[i,j])] = T[int(A[i,j])] + r_beta_sum[i,j]
+            
+    
+    n = 0
+    i = 0
+    j = 0
+    for n in range(elements_q):
+        for i in range(4):
+            for j in range(4):
+                matrix_global[int(A[n,i]),int(A[n,j])] = matrix_global[int(A[n,i]),int(A[n,j])] + k_k_sum[i,j,n]
+         
+    results = np.dot(np.linalg.inv(matrix_global),T)
     
     
     
