@@ -10,18 +10,26 @@ def r_beta(length, beta, element_number):
     if element_number == 1: #bound 1-2
         r[0] = k
         r[1] = k
+        # print('r_beta bound 1-2')
+        # print(r)
         
     elif element_number == 2: #bound 2-3
         r[1] = k
         r[2] = k
+        # print('r_beta bound 2-3')
+        # print(r)
         
     elif element_number == 3: #bound 3-4
         r[2] = k
         r[3] = k
+        # print('r_beta bound 3-4')
+        # print(r)
         
     elif element_number == 4: #bound 4-1
         r[3] = k
         r[0] = k
+        # print('r_beta bound 4-1')
+        # print(r_beta,2)
     
     else:
         print("R_beta Error")
@@ -39,36 +47,42 @@ def k_alfa(length, constant, element_number):
         k_alfa[0,1] = a2
         k_alfa[1,0] = a2
         k_alfa[1,1] = a1
+        # print('k_alfa bound 1-2')
+        # print(np.round(k_alfa,2))
         
     elif element_number == 2: #bound 2-3
         k_alfa[1,1] = a1
         k_alfa[1,2] = a2
         k_alfa[2,1] = a2
         k_alfa[2,2] = a1
+        # print('k_alfa bound 2-3')
+        # print(np.round(k_alfa,2))
         
     elif element_number == 3: #bound 3-4
         k_alfa[2,2] = a1
         k_alfa[2,3] = a2
         k_alfa[3,2] = a2
         k_alfa[3,3] = a1
+        # print('k_alfa bound 3-4')
+        # print(np.round(k_alfa,2))
         
     elif element_number == 4: #bound 4-1
         k_alfa[0,0] = a1
         k_alfa[0,3] = a2
         k_alfa[3,0] = a2
         k_alfa[3,3] = a1
+        # print('k_alfa bound 4-1')
+        # print(np.round(k_alfa,2))
         
     else:
         print(element_number)
         print("k_alfa error")
-        
         
     return k_alfa
 
 def r_q(a,b,q):
     r = np.ones((4,1))
     r_q = a*b*q*r
-    
     return r_q
 
 
@@ -98,7 +112,10 @@ def nodes_temperature(nodes_q, elements_q, A, r_beta_sum, k_k_sum):
         for i in range(4):
             for j in range(4):
                 matrix_global[int(A[n,i]),int(A[n,j])] = matrix_global[int(A[n,i]),int(A[n,j])] + k_k_sum[i,j,n]
-         
+    
+    matrix_g_latex = pd.DataFrame(np.round(matrix_global,2)).to_latex()
+    print(matrix_g_latex)
+    
     return np.dot(np.linalg.inv(matrix_global),T)
 
 def elements_temperature(a, b,A, nodes_temperature):       
@@ -132,7 +149,7 @@ if __name__ == '__main__':
     T_inf = 28
     k_x = 55
     k_y = 55
-    n_2 = 0
+    nodes = 0
     q = 0
     beta_1 = 6000
     beta_2 = h * T_inf
@@ -141,8 +158,8 @@ if __name__ == '__main__':
     b = a
     
     #Number of nodes and elements
-    elements_q = 10
-    nodes_q = 22
+    elements_q = 40
+    nodes_q = 63
 
     #Target matrixes 
     A = np.zeros((elements_q,4))
@@ -152,7 +169,7 @@ if __name__ == '__main__':
     #Boundary conditions for elements
     #Thickened mesh
     
-    '''
+    
     elements_data = np.array([[0,0,0,alfa,alfa,0,0,beta_2,beta_2,[7,8,2,1]],
                                 [1,0,alfa,alfa,0,0,beta_2,beta_2,0,[8,9,3,2]],
                                 [2,0,0,alfa,alfa,0,0,beta_2,beta_2,[10,11,5,4]],
@@ -205,7 +222,7 @@ if __name__ == '__main__':
                                 [7,0,0,alfa,0,beta_1,0,beta_2,0,[19, 20, 13, 12]],
                                 [8,0,0,alfa,0,beta_1,0,beta_2,0,[20, 21, 14, 13]],
                                 [9,0,alfa,0,0,beta_1,beta_2,0,0,[21, 22, 15, 14]]])
-      
+    ''' 
     
         
         
@@ -236,6 +253,8 @@ if __name__ == '__main__':
                
         k_k_1 = k_k_11 + k_alfa_112 + k_alfa_123 + k_alfa_134 + k_alfa_141
         
+        # print(np.round(k_k_1,2))
+        
         if elements_data[row,5] == 0:
             r_beta_112 = 0
         else:
@@ -258,6 +277,8 @@ if __name__ == '__main__':
         
         r_beta_1 = r_beta_112 + r_beta_123 + r_beta_134 + r_beta_141
         
+        # print(np.round(r_beta_1,2))
+        
         A[row,:] = elements_data[row,9]
         r_beta_sum[row,:] = np.transpose(r_beta_1)    
         k_k_sum[:,:,row] = k_k_1
@@ -267,18 +288,20 @@ if __name__ == '__main__':
     nodes_temperature = nodes_temperature(nodes_q, elements_q, A, r_beta_sum, k_k_sum) 
     elements_temperature = elements_temperature(a, b, A, nodes_temperature)
     
+    #print(np.round(nodes_temperature,2))
+    #print(elements_temperature)
+    
     #Visualisation - Seaborn Heatmap chart    
     n = 1
     nodes = np.zeros((n,n,elements_q))
     x1 = 0.02
-    print(x1)
     y = symbols('y')
     x = symbols('x')
 
     max_val = elements_temperature[0].subs([(x,0),(y,0)])
     min_val = max_val
     
-    print(elements_temperature)
+    #print(elements_temperature)
     
     for k in range(elements_q):
         for i in range(n):
@@ -290,9 +313,9 @@ if __name__ == '__main__':
                 if t < min_val:
                     min_val = t
     
-    print(nodes)
+    #print(nodes)
     
-    '''
+    
     
     heatmap=np.zeros((6*n,12*n))
     heatmap[0,0:2] = nodes[:,:,0:2]
@@ -321,9 +344,7 @@ if __name__ == '__main__':
      
     ax = sns.heatmap(heatmap, mask = heatmap < 0.01, xticklabels = [], yticklabels = [] ,cmap = 'Blues', vmin=40, vmax=65,linewidths=.5, annot = heatmap, square = True, linecolor='black', cbar_kws={'label': 'Temperatura [°C] '}).set_title('Rozkład 2D temperatury w elemencie')
     
-    
-    
-    
+    '''
     
     
     
