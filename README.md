@@ -2,7 +2,7 @@
 
 ### Description
 
-The program is created for calculating 2D heat transfer including source of heat and convection. The calculations were carried out for two finite element mesh sizes (10 and 40 elements).
+The program is created for calculating 2D heat transfer including source of heat and convection. The calculations were carried out for two finite element mesh sizes (10 and 40 elements). More information included in project_overview.pdf.
 
 ### Mesh
 
